@@ -200,6 +200,7 @@ http://localhost:8000
 ```
 itch.io link (deployed) : https://tan69.itch.io/maze-game-test
 
+[![video](https://img.youtube.com/vi/UfopyGAEuIQ/0.jpg)](https://youtu.be/UfopyGAEuIQ)
 
 
 
