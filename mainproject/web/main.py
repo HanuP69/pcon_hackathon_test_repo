@@ -8,7 +8,7 @@ async def main():
     random.seed(int(time.time() * 1000))
 
     pygame.init()
-    screen = pygame.display.set_mode((800, 800))
+    screen = pygame.display.set_mode((1280, 720))
     pygame.display.set_caption("Maze Solver")
 
     clock = pygame.time.Clock()
