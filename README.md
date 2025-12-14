@@ -195,7 +195,7 @@ pip install pygame pygbag
 pygbag .
 http://localhost:8000
 ```
-itch.io link (deployed) : 
+itch.io link (deployed) : https://tan69.itch.io/maze-game-test
 
 
 
