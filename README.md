@@ -57,7 +57,7 @@ Both BFS and A* are adapted to support this constraint.
 
 ### 4️⃣ Portals
 
-- Up to **10 portal pairs**, each color-coded
+- **portal pairs**, each color-coded
 - Stepping on a portal teleports the player to its paired location
 - Introduces **non-local edges**, converting the maze into a general graph
 
