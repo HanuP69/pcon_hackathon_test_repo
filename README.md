@@ -1,3 +1,6 @@
+<img width="2816" height="1536" alt="bg" src="https://github.com/user-attachments/assets/7f0b8ac9-c457-415b-a3a0-c0ef06a1671a" />
+
+
 # 🎨 CAT & MAZE
 **Where Graph Theory meets Pixel Art (and Cats 🐱)**
 
