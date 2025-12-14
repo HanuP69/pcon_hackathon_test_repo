@@ -3,14 +3,11 @@ __pycache__/
 *.py[cod]
 $py.class
 
-data/
-**/data/
-ai_python/data/
+
 build/
 
 
-results/
-models/
+
 
 *.pth
 *.pt
