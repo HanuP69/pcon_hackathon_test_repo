@@ -13,11 +13,13 @@ from src.tools.dataset_generator import generate_maze
 from src.solver.AStarSolver import AStarSolver
 from src.solver.bfs_solver import BFSSolver
 
+
 class WelcomeScreen:
     def __init__(self, game):
         self.game = game
         self.title_font = pygame.font.SysFont("Arial", 60, bold=True)
         self.subtitle_font = pygame.font.SysFont("Arial", 24)
+        
         self.blink_timer = 0
         self.show_text = True
 
@@ -33,7 +35,8 @@ class WelcomeScreen:
             self.blink_timer = 0
 
     def draw(self):
-        self.game.screen.fill((0, 0, 0))
+        self.game.screen.fill((0, 0, 0)) 
+
         title_surf = self.title_font.render("CAT & MAZE", True, (255, 255, 255))
         title_rect = title_surf.get_rect(center=(400, 350))
         self.game.screen.blit(title_surf, title_rect)
@@ -54,8 +57,12 @@ class NameScreen:
         self.cursor_visible = True
         self.cursor_timer = 0
         
-        self.bg_image = pygame.image.load("assets/bg.png")
-        self.bg_image = pygame.transform.scale(self.bg_image, (800, 800))
+        try:
+            self.bg_image = pygame.image.load("assets/bg.png")
+            self.bg_image = pygame.transform.scale(self.bg_image, (800, 800))
+            self.has_bg = True
+        except Exception:
+            self.has_bg = False
 
     def handle_events(self):
         for e in pygame.event.get():
@@ -94,10 +101,16 @@ class NameScreen:
             self.cursor_timer = 0
 
     def draw(self):
-        self.game.screen.blit(self.bg_image, (0, 0))
-        overlay = pygame.Surface((800, 800), pygame.SRCALPHA)
-        pygame.draw.rect(overlay, (0, 0, 0, 100), (0, 0, 800, 800))
-        self.game.screen.blit(overlay, (0, 0))
+        if self.has_bg:
+            self.game.screen.blit(self.bg_image, (0, 0))
+            overlay = pygame.Surface((800, 800), pygame.SRCALPHA)
+            pygame.draw.rect(overlay, (0, 0, 0, 100), (0, 0, 800, 800))
+            self.game.screen.blit(overlay, (0, 0))
+        else:
+            self.game.screen.fill((135, 206, 235))
+            for i in range(800):
+                color = (135 - i//10, 206 - i//15, 235 - i//20)
+                pygame.draw.line(self.game.screen, color, (0, i), (800, i))
         
         title = self.title_font.render("Enter Your Name", True, (255, 255, 255))
         title_rect = title.get_rect(center=(400, 280))
@@ -130,8 +143,12 @@ class ModeScreen:
         self.selected = 0
         self.hover_alpha = 0
         
-        self.bg_image = pygame.image.load("assets/bg.png")
-        self.bg_image = pygame.transform.scale(self.bg_image, (800, 800))
+        try:
+            self.bg_image = pygame.image.load("assets/bg.png")
+            self.bg_image = pygame.transform.scale(self.bg_image, (800, 800))
+            self.has_bg = True
+        except Exception as e:
+            self.has_bg = False
 
     def handle_events(self):
         for e in pygame.event.get():
@@ -166,10 +183,16 @@ class ModeScreen:
         self.hover_alpha = (self.hover_alpha + 5) % 255
 
     def draw(self):
-        self.game.screen.blit(self.bg_image, (0, 0))
-        overlay = pygame.Surface((800, 800), pygame.SRCALPHA)
-        pygame.draw.rect(overlay, (0, 0, 0, 120), (0, 0, 800, 800))
-        self.game.screen.blit(overlay, (0, 0))
+        if self.has_bg:
+            self.game.screen.blit(self.bg_image, (0, 0))
+            overlay = pygame.Surface((800, 800), pygame.SRCALPHA)
+            pygame.draw.rect(overlay, (0, 0, 0, 120), (0, 0, 800, 800))
+            self.game.screen.blit(overlay, (0, 0))
+        else:
+            self.game.screen.fill((135, 206, 235))
+            for i in range(800):
+                color = (135 - i//10, 206 - i//15, 235 - i//20)
+                pygame.draw.line(self.game.screen, color, (0, i), (800, i))
         
         title = self.title_font.render("Select Game Mode", True, (255, 255, 255))
         title_rect = title.get_rect(center=(400, 150))
@@ -218,13 +241,6 @@ class ModeScreen:
         self.game.screen.blit(hint, hint_rect)
 
 
-COL_HUD_BG = (15, 23, 42, 240) 
-COL_ACCENT = (56, 189, 248)    
-COL_TEXT = (226, 232, 240)     
-COL_GOLD = (250, 204, 21)
-COL_DANGER = (239, 68, 68)
-COL_SUCCESS = (34, 197, 94)
-
 class PlayScreen:
     def __init__(self, game, custom_maze=None, fixed_k=None):
         self.game = game
@@ -235,25 +251,33 @@ class PlayScreen:
         self.font_body = pygame.font.SysFont("Segoe UI", 16)
         self.font_mono = pygame.font.SysFont("Consolas", 14)
         
+        self.COL_HUD_BG = (15, 23, 42, 240) 
+        self.COL_ACCENT = (56, 189, 248)   
+        self.COL_TEXT = (226, 232, 240)    
+        self.COL_GOLD = (250, 204, 21)
+        self.COL_DANGER = (239, 68, 68)
+        self.COL_SUCCESS = (34, 197, 94)
+
         self.CELL_SIZE = 32
         self.SCREEN_W, self.SCREEN_H = self.game.screen.get_size()
         
+        try:
+            self.bg_img = pygame.image.load("assets/playscreen_bg.png")
+            self.bg_img = pygame.transform.scale(self.bg_img, (self.SCREEN_W, self.SCREEN_H))
+            self.has_bg = True
+        except:
+            self.has_bg = False
+            self.COL_BG_FALLBACK = (15, 23, 42)
+
         self.start_time = time.time()
-        self.total_pause_duration = 0
-        self.pause_start_timestamp = 0
-        self.paused = False 
-        
+        self.end_time = None
         self.finished = False
-        self.time_taken = 0
         
         self.show_astar = False
         self.show_bfs = False
         self.show_leaderboard = False
         self.show_controls = False 
         self.cached_scores = []
-
-        self.bg_img = pygame.image.load("assets/playscreen_bg.png")
-        self.bg_img = pygame.transform.scale(self.bg_img, (self.SCREEN_W, self.SCREEN_H))
 
         if custom_maze:
             self.maze = custom_maze
@@ -284,10 +308,7 @@ class PlayScreen:
         self.finished = False
         self.score = None
         self.score_submitted = False
-        
         self.start_time = time.time()
-        self.total_pause_duration = 0
-        self.paused = False
 
         bfs = BFSSolver(self.maze, self.K)
         res = bfs.shortest_path_with_path()
@@ -315,42 +336,26 @@ class PlayScreen:
         encoded = base64.urlsafe_b64encode(raw).decode()
         self.game.current_seed = f"MS2|{self.maze.cols}x{self.maze.rows}|{self.K}|{encoded}"
 
-    def toggle_pause(self, state=None):
-        new_state = not self.paused if state is None else state
-        if new_state == self.paused: return 
-
-        self.paused = new_state
-        if self.paused:
-            self.pause_start_timestamp = time.time()
-        else:
-            self.total_pause_duration += (time.time() - self.pause_start_timestamp)
-
-    def get_display_time(self):
-        if self.finished: return self.time_taken
-        now = time.time()
-        if self.paused:
-            return self.pause_start_timestamp - self.start_time - self.total_pause_duration
-        else:
-            return now - self.start_time - self.total_pause_duration
-
-    def _draw_loading(self, msg="Loading..."):
-        self.draw() 
-        overlay = pygame.Surface((self.SCREEN_W, self.SCREEN_H), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 150))
-        self.game.screen.blit(overlay, (0,0))
-        txt = self.font_title.render(msg, True, COL_ACCENT)
-        self.game.screen.blit(txt, txt.get_rect(center=(self.SCREEN_W//2, self.SCREEN_H//2)))
-        pygame.display.flip()
+    def save_to_leaderboard(self):
+        if not self.score_submitted:
+            add_score(
+                self.game.current_seed,
+                self.game.player_name,
+                self.score,
+                self.time_taken
+            )
+            self.score_submitted = True
+            self.cached_scores = get_scores(self.game.current_seed)
 
     def handle_events(self):
         for e in pygame.event.get():
-            if e.type != pygame.KEYDOWN: continue
+            if e.type != pygame.KEYDOWN:
+                continue
 
             if e.key == pygame.K_ESCAPE:
                 if self.show_leaderboard or self.show_controls:
                     self.show_leaderboard = False
                     self.show_controls = False
-                    self.toggle_pause(False) 
                 else:
                     self.game.switch(GameState.MODE)
                 return
@@ -358,30 +363,24 @@ class PlayScreen:
             if e.key == pygame.K_TAB:
                 self.show_leaderboard = not self.show_leaderboard
                 self.show_controls = False
-                self.toggle_pause(self.show_leaderboard)
-                
                 if self.show_leaderboard:
-                    self._draw_loading("Fetching Scores...")
-                    try: self.cached_scores = get_scores(self.game.current_seed)
-                    except: self.cached_scores = []
+                    self.cached_scores = get_scores(self.game.current_seed)
                 return
             
             if e.key == pygame.K_c:
                 self.show_controls = not self.show_controls
                 self.show_leaderboard = False
-                self.toggle_pause(self.show_controls)
                 return
 
-            if e.key == pygame.K_r:
-                self.game.restart_maze = self.maze
-                self.game.restart_k = self.K
-                self.game.switch(GameState.NAME)
-            elif e.key == pygame.K_t:
-                self.game.restart_maze = None
-                self.game.switch(GameState.NAME)
-
-            if self.paused or self.finished:
-                continue 
+            if self.finished or self.show_leaderboard or self.show_controls:
+                if e.key == pygame.K_r:
+                    self.game.restart_maze = self.maze
+                    self.game.restart_k = self.K
+                    self.game.switch(GameState.NAME)
+                elif e.key == pygame.K_t:
+                    self.game.restart_maze = None
+                    self.game.switch(GameState.NAME)
+                return
 
             shift = pygame.key.get_mods() & pygame.KMOD_SHIFT
             if e.key in (pygame.K_w, pygame.K_UP): self.player.try_move(-1, 0, self.maze) if not shift else self.player.break_wall(-1, 0, self.maze)
@@ -393,35 +392,28 @@ class PlayScreen:
             elif e.key == pygame.K_b: self.show_bfs = not self.show_bfs
 
     def update(self):
-        if self.paused or self.finished: return
-        
         update_animation()
-        
-        if (self.player.x, self.player.y) == self.maze.goal:
+        if not self.finished and (self.player.x, self.player.y) == self.maze.goal:
             self.finished = True
-            self.time_taken = round(self.get_display_time(), 2)
+            self.end_time = time.time()
+            self.time_taken = round(self.end_time - self.start_time, 2)
             
             if self.player.steps > 0:
                 self.score = (self.bfs_dist / self.player.steps) * 100
             else:
                 self.score = 0
             
-            self._draw_loading("Submitting Score...")
-            
-            if not self.score_submitted:
-                add_score(self.game.current_seed, self.game.player_name, self.score, self.time_taken)
-                self.score_submitted = True
-                try: self.cached_scores = get_scores(self.game.current_seed)
-                except: self.cached_scores = []
-
+            self.save_to_leaderboard()
             self.show_leaderboard = True
-            self.toggle_pause(True)
 
     def draw(self):
-        self.game.screen.blit(self.bg_img, (0, 0))
-        s = pygame.Surface((self.SCREEN_W, self.SCREEN_H), pygame.SRCALPHA)
-        s.fill((10, 15, 30, 180)) 
-        self.game.screen.blit(s, (0,0))
+        if self.has_bg:
+            self.game.screen.blit(self.bg_img, (0, 0))
+            s = pygame.Surface((self.SCREEN_W, self.SCREEN_H), pygame.SRCALPHA)
+            s.fill((10, 15, 30, 180)) 
+            self.game.screen.blit(s, (0,0))
+        else:
+            self.game.screen.fill(self.COL_BG_FALLBACK)
 
         self._draw_maze_layer()
         self._draw_hud()
@@ -438,7 +430,11 @@ class PlayScreen:
         maze_w = self.maze.cols * self.CELL_SIZE
         maze_h = self.maze.rows * self.CELL_SIZE
         maze_surf = pygame.Surface((maze_w, maze_h))
-        maze_surf.fill((20, 25, 40)) 
+       
+        if self.has_bg:
+            maze_surf.fill((20, 25, 40)) 
+        else:
+            maze_surf.fill(self.COL_BG_FALLBACK)
 
         draw_maze(maze_surf, self.maze, self.font_mono)
         
@@ -448,66 +444,80 @@ class PlayScreen:
 
         if self.show_bfs: draw_path(maze_surf, self.bfs_path, color=(236, 72, 153))
         if self.show_astar: draw_path(maze_surf, self.astar_path, color=(6, 182, 212))
-        if self.finished: draw_path(maze_surf, self.player.path, color=COL_GOLD)
+        if self.finished: draw_path(maze_surf, self.player.path, color=self.COL_GOLD)
         
         draw_player(maze_surf, self.player)
 
-        pygame.draw.rect(self.game.screen, (0, 0, 0, 150), (self.maze_offset_x+8, self.maze_offset_y+8, maze_w, maze_h), border_radius=4)
-        pygame.draw.rect(self.game.screen, (71, 85, 105), (self.maze_offset_x-2, self.maze_offset_y-2, maze_w+4, maze_h+4), 2)
+        shadow_rect = pygame.Rect(self.maze_offset_x + 8, self.maze_offset_y + 8, maze_w, maze_h)
+        pygame.draw.rect(self.game.screen, (0, 0, 0, 150), shadow_rect, border_radius=4)
+        
+        border_rect = pygame.Rect(self.maze_offset_x - 2, self.maze_offset_y - 2, maze_w + 4, maze_h + 4)
+        pygame.draw.rect(self.game.screen, (71, 85, 105), border_rect, border_radius=2)
+        
         self.game.screen.blit(maze_surf, (self.maze_offset_x, self.maze_offset_y))
 
     def _draw_hud(self):
         hud_h = 70
         s = pygame.Surface((self.SCREEN_W, hud_h), pygame.SRCALPHA)
-        s.fill(COL_HUD_BG)
+        s.fill(self.COL_HUD_BG)
         self.game.screen.blit(s, (0, 0))
         pygame.draw.line(self.game.screen, (56, 189, 248, 100), (0, hud_h), (self.SCREEN_W, hud_h), 1)
 
         if self.finished:
-            status_txt, status_col = "LEVEL COMPLETE", COL_SUCCESS
-        elif self.paused:
-            status_txt, status_col = "PAUSED", COL_GOLD
+            current_time = self.time_taken
+            status_txt = "LEVEL COMPLETE"
+            status_col = self.COL_SUCCESS
         else:
-            status_txt, status_col = "EXPLORING", COL_ACCENT
+            current_time = time.time() - self.start_time
+            status_txt = "EXPLORING"
+            status_col = self.COL_ACCENT
 
-        self._draw_hud_pill(40, "TIME", f"{self.get_display_time():.1f}s")
+        self._draw_hud_pill(40, "TIME", f"{current_time:.1f}s")
         self._draw_hud_pill(160, "STEPS", str(self.player.steps))
-        
+
         title = self.font_title.render(status_txt, True, status_col)
         self.game.screen.blit(title, title.get_rect(center=(self.SCREEN_W // 2, hud_h // 2)))
 
-        brk_col = COL_DANGER if self.player.breaks_left == 0 else COL_SUCCESS
-        self._draw_hud_pill(self.SCREEN_W - 240, "BREAKS", f"{self.player.breaks_left}/{self.player.max_breaks}", brk_col)
+        brk_col = self.COL_DANGER if self.player.breaks_left == 0 else self.COL_SUCCESS
+        self._draw_hud_pill(self.SCREEN_W - 240, "BREAKS", 
+                            f"{self.player.breaks_left}/{self.player.max_breaks}", brk_col)
         
         if self.finished and self.score is not None:
-             self._draw_hud_pill(self.SCREEN_W - 120, "SCORE", f"{self.score:.0f}", COL_GOLD)
+             self._draw_hud_pill(self.SCREEN_W - 120, "SCORE", f"{self.score:.0f}", self.COL_GOLD)
 
-    def _draw_hud_pill(self, x, label, val, color=COL_ACCENT):
+    def _draw_hud_pill(self, x, label, val, color=None):
+        if not color: color = self.COL_ACCENT
         self.game.screen.blit(self.font_hud_label.render(label, True, (148, 163, 184)), (x, 15))
         self.game.screen.blit(self.font_hud_val.render(str(val), True, color), (x, 35))
 
     def _draw_hints(self):
         hint_y = self.SCREEN_H - 30
-        hints = "TAB: Leaderboard   |   C: Controls   |   ESC: Menu"
+        hints = "TAB: Leaderboard  |  C: Controls  |  ESC: Menu"
         self.game.screen.blit(self.font_body.render(hints, True, (148, 163, 184)), (20, hint_y))
-        if self.game.current_seed:
-            lbl = self.font_mono.render(f"ID: {self.game.current_seed[:18]}...", True, (71, 85, 105))
+        
+        if hasattr(self.game, 'current_seed') and self.game.current_seed:
+            sid = self.game.current_seed[:18] + "..."
+            lbl = self.font_mono.render(f"ID: {sid}", True, (71, 85, 105))
             self.game.screen.blit(lbl, (self.SCREEN_W - lbl.get_width() - 20, hint_y))
 
     def _draw_overlay_bg(self):
-        s = pygame.Surface((self.SCREEN_W, self.SCREEN_H), pygame.SRCALPHA)
-        s.fill((0, 0, 0, 180))
-        self.game.screen.blit(s, (0, 0))
+        overlay = pygame.Surface((self.SCREEN_W, self.SCREEN_H), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 180))
+        self.game.screen.blit(overlay, (0, 0))
 
     def _draw_leaderboard_modal(self):
         w, h = 520, 440
         x, y = (self.SCREEN_W - w) // 2, (self.SCREEN_H - h) // 2
+        
+        # Modern Card Style
         pygame.draw.rect(self.game.screen, (30, 41, 59), (x, y, w, h), border_radius=12)
-        pygame.draw.rect(self.game.screen, COL_ACCENT, (x, y, w, h), 2, border_radius=12)
+        pygame.draw.rect(self.game.screen, self.COL_ACCENT, (x, y, w, h), 2, border_radius=12)
 
-        self.game.screen.blit(self.font_title.render("LEADERBOARD", True, COL_ACCENT), (x + 25, y + 20))
+        # Header
+        self.game.screen.blit(self.font_title.render("LEADERBOARD", True, self.COL_ACCENT), (x + 25, y + 20))
         self.game.screen.blit(self.font_body.render("[TAB] Close", True, (100, 100, 100)), (x + w - 110, y + 30))
 
+        # Columns
         start_y = y + 80
         headers = ["#", "PLAYER", "SCORE", "TIME"]
         pxs = [x+25, x+70, x+320, x+420]
@@ -521,32 +531,35 @@ class PlayScreen:
             self.game.screen.blit(lbl, (x + w//2 - lbl.get_width()//2, row_y + 40))
         else:
             for i, s in enumerate(self.cached_scores[:8]):
-                col = COL_TEXT
-                if i == 0: col = COL_GOLD
+                col = self.COL_TEXT
+                if i == 0: col = self.COL_GOLD
                 elif i == 1: col = (192, 192, 192)
                 elif i == 2: col = (205, 127, 50)
-                name = s['name'][:14] + ".." if len(s['name']) > 14 else s['name']
+
+                name_disp = s['name'][:14] + ".." if len(s['name']) > 14 else s['name']
                 self.game.screen.blit(self.font_body.render(str(i+1), True, col), (pxs[0], row_y))
-                self.game.screen.blit(self.font_body.render(name, True, col), (pxs[1], row_y))
+                self.game.screen.blit(self.font_body.render(name_disp, True, col), (pxs[1], row_y))
                 self.game.screen.blit(self.font_body.render(f"{s['score']:.0f}", True, col), (pxs[2], row_y))
                 self.game.screen.blit(self.font_body.render(f"{s['time']:.1f}s", True, col), (pxs[3], row_y))
                 row_y += 32
 
         if self.finished:
-            lbl = self.font_body.render("PRESS [R] TO RETRY   |   [T] NEW MAP", True, COL_SUCCESS)
+            lbl = self.font_body.render("PRESS [R] TO RETRY  |  [T] NEW MAP", True, self.COL_SUCCESS)
             self.game.screen.blit(lbl, lbl.get_rect(center=(x+w//2, y+h-40)))
 
     def _draw_controls_modal(self):
         w, h = 420, 380
         x, y = (self.SCREEN_W - w) // 2, (self.SCREEN_H - h) // 2
+        
         pygame.draw.rect(self.game.screen, (30, 41, 59), (x, y, w, h), border_radius=12)
         pygame.draw.rect(self.game.screen, (148, 163, 184), (x, y, w, h), 2, border_radius=12)
+
         self.game.screen.blit(self.font_title.render("CONTROLS", True, (148, 163, 184)), (x + 25, y + 20))
         
         controls = [("WASD / Arrows", "Move"), ("SHIFT + Move", "Break Wall"), ("ENTER", "Use Portal"), 
                     ("TAB", "Leaderboard"), ("B / H", "Toggle Hints"), ("R", "Retry"), ("T", "New Map"), ("ESC", "Menu")]
         cy = y + 80
         for key, desc in controls:
-            self.game.screen.blit(self.font_mono.render(key, True, COL_ACCENT), (x + 30, cy))
-            self.game.screen.blit(self.font_body.render(desc, True, COL_TEXT), (x + 200, cy))
+            self.game.screen.blit(self.font_mono.render(key, True, self.COL_ACCENT), (x + 30, cy))
+            self.game.screen.blit(self.font_body.render(desc, True, self.COL_TEXT), (x + 200, cy))
             cy += 32
