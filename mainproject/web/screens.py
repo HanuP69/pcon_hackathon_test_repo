@@ -4,7 +4,7 @@ import base64
 import random
 
 from web.renderer import draw_maze, draw_player, draw_path, update_animation
-from web.clipboard import copy, paste  
+from web.clipboard import copy, paste 
 from web.state import GameState
 from web.leaderboard import add_score, get_scores
 from web.player import Player
@@ -17,45 +17,38 @@ from src.solver.bfs_solver import BFSSolver
 class WelcomeScreen:
     def __init__(self, game):
         self.game = game
-        self.title_font = pygame.font.SysFont("Arial", 48, bold=True)
+        self.title_font = pygame.font.SysFont("Arial", 60, bold=True)
         self.subtitle_font = pygame.font.SysFont("Arial", 24)
-        self.start_time = pygame.time.get_ticks()
-        self.alpha = 0
+        
+        # Blink effect for "Press any key"
+        self.blink_timer = 0
+        self.show_text = True
 
     def handle_events(self):
-        pass
+        for e in pygame.event.get():
+            if e.type == pygame.KEYDOWN or e.type == pygame.MOUSEBUTTONDOWN:
+                self.game.switch(GameState.NAME)
 
     def update(self):
- 
-        elapsed = pygame.time.get_ticks() - self.start_time
-        self.alpha = min(255, elapsed // 8)
-        
-        if elapsed > 2000:
-            self.game.switch(GameState.NAME)
+        # Simple text blinking logic
+        self.blink_timer += 1
+        if self.blink_timer > 30:
+            self.show_text = not self.show_text
+            self.blink_timer = 0
 
     def draw(self):
-        self.game.screen.fill((135, 206, 235))
-        for i in range(800):
-            color = (135 - i//10, 206 - i//15, 235 - i//20)
-            pygame.draw.line(self.game.screen, color, (0, i), (800, i))
-        
-        title_text = "Maze Solver"
-        shadow = self.title_font.render(title_text, True, (0, 0, 0))
-        title = self.title_font.render(title_text, True, (255, 255, 255))
-        
-        shadow_rect = shadow.get_rect(center=(402, 352))
-        title_rect = title.get_rect(center=(400, 350))
-        
-        shadow.set_alpha(self.alpha)
-        title.set_alpha(self.alpha)
-        
-        self.game.screen.blit(shadow, shadow_rect)
-        self.game.screen.blit(title, title_rect)
-        
-        subtitle = self.subtitle_font.render("Find the fish, brave cat!", True, (255, 255, 255))
-        subtitle.set_alpha(self.alpha)
-        subtitle_rect = subtitle.get_rect(center=(400, 420))
-        self.game.screen.blit(subtitle, subtitle_rect)
+        self.game.screen.fill((0, 0, 0)) # Black background
+
+        # Draw Title
+        title_surf = self.title_font.render("CAT & MAZE", True, (255, 255, 255))
+        title_rect = title_surf.get_rect(center=(400, 350))
+        self.game.screen.blit(title_surf, title_rect)
+
+        # Draw "Press Start" text
+        if self.show_text:
+            sub_surf = self.subtitle_font.render("Press any key to start", True, (200, 200, 200))
+            sub_rect = sub_surf.get_rect(center=(400, 450))
+            self.game.screen.blit(sub_surf, sub_rect)
 
 
 class NameScreen:
@@ -67,6 +60,13 @@ class NameScreen:
         self.name = ""
         self.cursor_visible = True
         self.cursor_timer = 0
+        
+        try:
+            self.bg_image = pygame.image.load("assets/bg.png")
+            self.bg_image = pygame.transform.scale(self.bg_image, (800, 800))
+            self.has_bg = True
+        except Exception:
+            self.has_bg = False
 
     def handle_events(self):
         for e in pygame.event.get():
@@ -105,10 +105,16 @@ class NameScreen:
             self.cursor_timer = 0
 
     def draw(self):
-        self.game.screen.fill((135, 206, 235))
-        for i in range(800):
-            color = (135 - i//10, 206 - i//15, 235 - i//20)
-            pygame.draw.line(self.game.screen, color, (0, i), (800, i))
+        if self.has_bg:
+            self.game.screen.blit(self.bg_image, (0, 0))
+            overlay = pygame.Surface((800, 800), pygame.SRCALPHA)
+            pygame.draw.rect(overlay, (0, 0, 0, 100), (0, 0, 800, 800))
+            self.game.screen.blit(overlay, (0, 0))
+        else:
+            self.game.screen.fill((135, 206, 235))
+            for i in range(800):
+                color = (135 - i//10, 206 - i//15, 235 - i//20)
+                pygame.draw.line(self.game.screen, color, (0, i), (800, i))
         
         title = self.title_font.render("Enter Your Name", True, (255, 255, 255))
         title_rect = title.get_rect(center=(400, 280))
@@ -140,6 +146,13 @@ class ModeScreen:
         self.desc_font = pygame.font.SysFont("Arial", 18)
         self.selected = 0
         self.hover_alpha = 0
+        
+        try:
+            self.bg_image = pygame.image.load("assets/bg.png")
+            self.bg_image = pygame.transform.scale(self.bg_image, (800, 800))
+            self.has_bg = True
+        except Exception as e:
+            self.has_bg = False
 
     def handle_events(self):
         for e in pygame.event.get():
@@ -174,10 +187,16 @@ class ModeScreen:
         self.hover_alpha = (self.hover_alpha + 5) % 255
 
     def draw(self):
-        self.game.screen.fill((135, 206, 235))
-        for i in range(800):
-            color = (135 - i//10, 206 - i//15, 235 - i//20)
-            pygame.draw.line(self.game.screen, color, (0, i), (800, i))
+        if self.has_bg:
+            self.game.screen.blit(self.bg_image, (0, 0))
+            overlay = pygame.Surface((800, 800), pygame.SRCALPHA)
+            pygame.draw.rect(overlay, (0, 0, 0, 120), (0, 0, 800, 800))
+            self.game.screen.blit(overlay, (0, 0))
+        else:
+            self.game.screen.fill((135, 206, 235))
+            for i in range(800):
+                color = (135 - i//10, 206 - i//15, 235 - i//20)
+                pygame.draw.line(self.game.screen, color, (0, i), (800, i))
         
         title = self.title_font.render("Select Game Mode", True, (255, 255, 255))
         title_rect = title.get_rect(center=(400, 150))
@@ -364,8 +383,6 @@ class PlayScreen:
     def draw(self):
         self.game.screen.fill((135, 206, 235))
         
-
-  
         maze_width = self.maze.cols * self.CELL_SIZE
         maze_height = self.maze.rows * self.CELL_SIZE
         maze_surface = pygame.Surface((maze_width, maze_height))
@@ -397,18 +414,15 @@ class PlayScreen:
         
         panel_top = self.maze_offset_y + maze_height + 20
         
-
         if self.finished:
             status = self.title_font.render("FINISHED!", True, (255, 255, 255))
         else:
             status = self.title_font.render("PLAYING", True, (255, 255, 255))
         
-
         shadow = self.title_font.render(status.get_rect().width * " ", True, (0, 0, 0))
         self.game.screen.blit(shadow, (42, panel_top + 2))
         self.game.screen.blit(status, (40, panel_top))
         
- 
         stats_y = panel_top + 40
         current_time_val = self.time_taken if self.finished else time.time() - self.start_time
         
@@ -422,7 +436,6 @@ class PlayScreen:
         if self.finished and self.score is not None:
             self.draw_stat_box(40, stats_y + 80, 140, 60, "Score", f"{self.score:.1f}", (255, 215, 0))
         
-    
         panel_x = 440
         panel_y = panel_top
         
@@ -432,7 +445,6 @@ class PlayScreen:
             self.draw_controls(panel_x, panel_y)
 
     def draw_stat_box(self, x, y, width, height, label, value, accent=(100, 149, 237)):
-
         box = pygame.Rect(x, y, width, height)
         pygame.draw.rect(self.game.screen, (255, 255, 255), box, border_radius=5)
         pygame.draw.rect(self.game.screen, accent, box, 2, border_radius=5)
@@ -445,12 +457,11 @@ class PlayScreen:
         self.game.screen.blit(value_text, value_rect)
 
     def draw_leaderboard(self, x, y):
-
         panel = pygame.Rect(x - 10, y - 10, 330, 280)
         pygame.draw.rect(self.game.screen, (255, 255, 255), panel, border_radius=10)
         pygame.draw.rect(self.game.screen, (100, 149, 237), panel, 3, border_radius=10)
 
-        title = self.title_font.render("🏆 Leaderboard", True, (100, 149, 237))
+        title = self.title_font.render("Leaderboard", True, (100, 149, 237))
         self.game.screen.blit(title, (x, y))
         y += 40
         
@@ -460,7 +471,6 @@ class PlayScreen:
             no_scores = self.hud_font.render("No scores yet!", True, (150, 150, 150))
             self.game.screen.blit(no_scores, (x + 60, y + 50))
         else:
- 
             headers = ["#", "NAME", "SCORE", "TIME"]
             x_positions = [x, x + 30, x + 130, x + 220]
             
@@ -504,7 +514,6 @@ class PlayScreen:
         self.game.screen.blit(hint, (x + 80, y + 10))
 
     def draw_controls(self, x, y):
-
         panel = pygame.Rect(x - 10, y - 10, 330, 280)
         pygame.draw.rect(self.game.screen, (255, 255, 255), panel, border_radius=10)
         pygame.draw.rect(self.game.screen, (100, 149, 237), panel, 3, border_radius=10)
@@ -525,9 +534,8 @@ class PlayScreen:
             self.game.screen.blit(legend_text, (x + 30, y + 2))
             y += 28
         
-        y += 10 # 
+        y += 10
         
-  
         controls = [
             ("WASD", "Move"),
             ("SHIFT+MOVE", "Break"), 
@@ -545,11 +553,9 @@ class PlayScreen:
             col = i%2 
             row = i//2
             
-
             current_x = x + (col * col_width)
             current_y = start_y + (row * 28)
             
-
             key_width = max(50, len(key) * 9 + 10) 
             key_rect = pygame.Rect(current_x, current_y, key_width, 22)
             pygame.draw.rect(self.game.screen, (100, 149, 237), key_rect, border_radius=4)
