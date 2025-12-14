@@ -109,7 +109,7 @@ Custom maps are encoded into a compact, shareable string.
 4. Attach metadata
 
 ### Format
-MS2|20x20|K|<Base64Payload>
+```MS2|20x20|K|<Base64Payload>```
 
 - `MS2` → Protocol version
 - `20x20` → Grid size
