@@ -1,5 +1,4 @@
 import sys
-import pygame
 
 IS_WEB = sys.platform == "emscripten"
 
