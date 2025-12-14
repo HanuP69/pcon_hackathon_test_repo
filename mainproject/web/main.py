@@ -1,8 +1,12 @@
 import asyncio
+import random
+import time
 import pygame
 from web.game import Game
 
 async def main():
+    random.seed(int(time.time() * 1000))
+
     pygame.init()
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption("Maze Solver")

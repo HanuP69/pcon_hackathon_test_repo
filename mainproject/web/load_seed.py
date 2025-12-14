@@ -3,10 +3,10 @@ import base64
 import re
 import sys
 
+
 IS_WEB = sys.platform == "emscripten"
 if IS_WEB:
     from platform import window
-
 
 from web.state import GameState
 from src.core.maze import Maze, CellType
@@ -23,7 +23,6 @@ class SeedLoadScreen:
     def handle_events(self):
         for e in pygame.event.get():
             if e.type == pygame.KEYDOWN:
-                
                 if e.key == pygame.K_ESCAPE:
                     self.game.switch(GameState.MODE)
                     return
@@ -34,11 +33,13 @@ class SeedLoadScreen:
                     self.seed_text = self.seed_text[:-1]
                     return
 
-
-                if e.key == pygame.K_v and (e.mod & pygame.KMOD_CTRL):          
+                if e.key == pygame.K_v and (e.mod & pygame.KMOD_CTRL):
+                    
                     if IS_WEB:
                         try:
                             text = window.prompt("Paste Seed Here:", "")
+                            if text:
+                                self.seed_text += text
                         except Exception as err:
                             print(f"ERROR: {err}")
                     else:
@@ -51,6 +52,7 @@ class SeedLoadScreen:
                         except:
                             print("Clipboard not available")
                     return
+
                 if e.unicode.isprintable() and not (e.mod & pygame.KMOD_CTRL):
                     self.seed_text += e.unicode
 
@@ -82,6 +84,7 @@ class SeedLoadScreen:
                 payload = parts[2]
             else:
                 raise ValueError("Unknown Version")
+
             W, H = map(int, size_str.split("x"))
             pad = len(payload) % 4
             if pad: payload += '=' * (4 - pad)
@@ -90,6 +93,7 @@ class SeedLoadScreen:
             
             if len(flat) != W * H:
                 raise ValueError(f"Size mismatch: {len(flat)} vs {W*H}")
+
             maze = Maze(W, H)
             portal_map = {}
             idx = 0
