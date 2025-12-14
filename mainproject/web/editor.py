@@ -15,10 +15,11 @@ from src.solver.bfs_solver import BFSSolver
 
 CELL_SIZE = 32  
 GRID_DIM = 15
-PANEL_HEIGHT = 180  
+PANEL_HEIGHT = 180 
 PADDING = 20
 
-COL_BG = (135, 206, 235)       
+
+COL_BG = (135, 206, 235)      
 COL_PANEL_BG = (245, 245, 250)  
 COL_ACCENT = (56, 126, 245)     
 COL_BORDER = (180, 180, 190)
@@ -37,6 +38,7 @@ class EditorScreen:
     def __init__(self, game):
         self.game = game
         
+        # Fonts
         self.font_ui = pygame.font.SysFont("Segoe UI", 14)
         self.font_bold = pygame.font.SysFont("Segoe UI", 14, bold=True)
         self.font_big = pygame.font.SysFont("Segoe UI", 24, bold=True)
@@ -44,23 +46,25 @@ class EditorScreen:
 
         renderer.load_sprites()
         
+        # Dimensions
         self.GRID_DIM = GRID_DIM
         self.grid_pixel_w = self.GRID_DIM * CELL_SIZE
         self.grid_pixel_h = self.GRID_DIM * CELL_SIZE
         
-        screen_w = self.game.screen.get_size()
+        screen_w, screen_h = self.game.screen.get_size()
         
         self.grid_origin_x = (screen_w - self.grid_pixel_w) // 2
         self.grid_origin_y = 20 
         
         panel_y = self.grid_origin_y + self.grid_pixel_h + 20
-
         self.panel_rect = pygame.Rect(
             (screen_w - 760) // 2, 
             panel_y, 
             760, 
             PANEL_HEIGHT
         )
+
+        # UI State
         self.grid = [[TILE_EMPTY for _ in range(self.GRID_DIM)]
                      for _ in range(self.GRID_DIM)]
         
@@ -99,7 +103,6 @@ class EditorScreen:
     def handle_click(self, pos):
         x, y = pos
         
-
         for key, rect in self.buttons.items():
             if rect.collidepoint(pos):
                 self.handle_button_click(key)
@@ -244,7 +247,6 @@ class EditorScreen:
         self.game.screen.fill(COL_BG)
         self.buttons = {} 
 
-
         grid_rect = pygame.Rect(self.grid_origin_x, self.grid_origin_y, self.grid_pixel_w, self.grid_pixel_h)
         pygame.draw.rect(self.game.screen, (0, 0, 0), grid_rect.move(2, 2)) # Shadow
 
@@ -253,9 +255,7 @@ class EditorScreen:
                 x = self.grid_origin_x + i * CELL_SIZE
                 y = self.grid_origin_y + j * CELL_SIZE
                 
-
                 self.game.screen.blit(self._get_icon('grass', CELL_SIZE), (x, y))
-
 
                 cell = self.grid[i][j]
                 
@@ -270,9 +270,7 @@ class EditorScreen:
                     p_img = pygame.transform.scale(p_img, (CELL_SIZE, CELL_SIZE))
                     self.game.screen.blit(p_img, (x, y))
                 
-
                 pygame.draw.rect(self.game.screen, (0, 0, 0, 20), (x, y, CELL_SIZE, CELL_SIZE), 1)
-
 
         px, py = self.panel_rect.topleft
         pw, ph = self.panel_rect.size
@@ -280,12 +278,10 @@ class EditorScreen:
         pygame.draw.rect(self.game.screen, COL_PANEL_BG, self.panel_rect, border_radius=10)
         pygame.draw.rect(self.game.screen, COL_BORDER, self.panel_rect, 3, border_radius=10)
 
-
         def draw_btn(x, y, t_id, label=None, icon_key=None, surf=None):
             rect = pygame.Rect(x, y, 40, 40)
             self.buttons[t_id] = rect
             
-
             is_sel = False
             if "PORTAL" in t_id:
                 pid = int(t_id.split("_")[2])
@@ -354,7 +350,7 @@ class EditorScreen:
         lbl = self.font_bold.render("BREAKS (K)", True, COL_SUBTEXT)
         self.game.screen.blit(lbl, (cx, cy))
         cy += 35
-
+ 
         m_rect = pygame.Rect(cx, cy, 30, 30)
         self.buttons["BTN_MINUS"] = m_rect
         pygame.draw.rect(self.game.screen, (230, 230, 235), m_rect, border_radius=4)
@@ -394,4 +390,6 @@ class EditorScreen:
         msg_surf = self.font_ui.render(self.message, True, msg_col)
         self.game.screen.blit(msg_surf, (cx, cy))
         
-        
+        if self.seed:
+            s_surf = self.font_mono.render("Seed Copied!", True, (150, 150, 150))
+            self.game.screen.blit(s_surf, (cx, cy + 20))
